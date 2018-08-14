@@ -23,7 +23,7 @@ class LoginController extends Controller
         try {
             $login = User::where('public_key', $public_key)->first();
             if ($login) {
-                if ($this->validarCliente($public_key)) {
+                if ($this->validarCliente($public_key)) {// validar en regla de negocio si se pregunta siempre al hacer login o solo para los nuevos, yo creeria que siempre en caso de cambio de public key
                     try {
                         $api_token = sha1($login->id_user.time());
 
