@@ -24,6 +24,10 @@ class Authenticate
                         $res['status'] = false;
                         $res['message'] = 'Sin autorización.';
                         return response($res, 401);
+                    } else {
+	                    $res['status'] = false;
+	                    $res['message'] = 'Por favor haga login.';
+	                    return response($res, 401);
                     }
                 } catch (\Illuminate\Database\QueryException $ex) {
                     $res['status'] = false;
@@ -32,7 +36,7 @@ class Authenticate
                 }
             } else {
                 $res['status'] = false;
-                $res['message'] = 'Por favor haga login.';
+                $res['message'] = 'Por favor envie el token.';
                 return response($res, 401);
             }
         }

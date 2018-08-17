@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+	   Commands\ExpireCommand::class,
     ];
 
     /**
@@ -24,6 +24,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+	    $schedule->command('expire:token')->everyFiveMinutes();
+	    //crear cron en el server que ejecute  * * * * php /path/to/artisan schedule:run 1>> /dev/null 2>&1
     }
 }

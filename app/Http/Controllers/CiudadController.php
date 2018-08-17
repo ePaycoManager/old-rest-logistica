@@ -2,17 +2,45 @@
 	
 	namespace App\Http\Controllers;
 	
-	use Illuminate\Http\Request;
-	use Illuminate\Validation\ValidationException;
-	use Illuminate\Support\Facades\Hash;
-	use App\Ciudad;
 	
-	class CiudadController extends Controller {
+	use App\Interfaces\CiudadInterface;
+	
+	class CiudadController extends ApiController {
+		
+		private $ciudad;
+		
+		
+		public function __construct( CiudadInterface $ciudad) {
+			$this->ciudad = $ciudad;
+		}
+		
 		public function index(){
 			
-			$ciudades  = Ciudad::all();
+			$ciudades = $this->ciudad->listarPlano();
 			
-			return response()->json($ciudades);
+			$response = $this->generateResponse($ciudades,'200','Ciudades consultadas correctamente');
+			
+			return $response;
+		}
+		
+		
+		public function departamentos(){
+			
+			$departamentos  = $ciudades = $this->ciudad->listarDepartamentos();
+			
+			$response = $this->generateResponse($departamentos,'200','Departamentos consultados correctamente');
+			
+			return $response;
+			
+		}
+		
+		public function ciudadesAgrupado(){
+			
+			$ciudadesAgrupado= $this->ciudad->listarAgrupadoDepartamentos();
+			
+			$response = $this->generateResponse($ciudadesAgrupado,'200','Ciudades agrupadas consultadas correctamente');
+			
+			return $response;
 			
 		}
 	}
