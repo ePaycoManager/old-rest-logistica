@@ -18,7 +18,7 @@
 			
 			$ciudades = $this->ciudad->listarPlano();
 			
-			$response = $this->generateResponse($ciudades,'200','Ciudades consultadas correctamente');
+			$response = $this->generateResponse($ciudades,'true','200','Ciudades consultadas correctamente');
 			
 			return $response;
 		}
@@ -28,7 +28,7 @@
 			
 			$departamentos  = $ciudades = $this->ciudad->listarDepartamentos();
 			
-			$response = $this->generateResponse($departamentos,'200','Departamentos consultados correctamente');
+			$response = $this->generateResponse($departamentos,'true','200','Departamentos consultados correctamente');
 			
 			return $response;
 			
@@ -38,7 +38,7 @@
 			
 			$ciudadesAgrupado= $this->ciudad->listarAgrupadoDepartamentos();
 			
-			$response = $this->generateResponse($ciudadesAgrupado,'200','Ciudades agrupadas consultadas correctamente');
+			$response = $this->generateResponse($ciudadesAgrupado,'true','200','Ciudades agrupadas consultadas correctamente');
 			
 			return $response;
 			

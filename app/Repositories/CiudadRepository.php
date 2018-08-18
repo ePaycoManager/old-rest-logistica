@@ -20,7 +20,7 @@
 		
 		public function listarAgrupadoDepartamentos() {
 			$response = array();
-			$departamentos  = DB::table('ciudades')->orderBy('departamento','asc')->distinct()->get(['departamento']);
+			$departamentos  = $this->listarDepartamentos();
 			foreach ($departamentos as $departamento){
 				$response[$departamento->departamento] =  DB::table('ciudades')->where('departamento',$departamento->departamento)->get();
 			}
