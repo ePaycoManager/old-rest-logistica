@@ -11,6 +11,7 @@ class CreateTableTccCotizaciones extends Migration
      *
      * @return void
      */
+    protected $table='tcc_cotizaciones';
     public function up()
     {
         Schema::create('tcc_cotizaciones', function (Blueprint $table) {
@@ -21,6 +22,7 @@ class CreateTableTccCotizaciones extends Migration
 	        $table->string('boomerang')->nullable();
 	        $table->string('cuenta')->nullable();
 	        $table->dateTime('fecha_remesa')->nullable();
+	        $table->integer('id_unidad_estrategica_negocio')->nullable();
 	        $table->string('numero_unidades')->nullable();
 	        $table->string('peso_real')->nullable();
 	        $table->string('peso_volumen')->nullable();
@@ -28,6 +30,13 @@ class CreateTableTccCotizaciones extends Migration
 	        $table->string('largo')->nullable();
 	        $table->string('ancho')->nullable();
 	        $table->string('tipo_empaque')->nullable();
+	        $table->string('total_despacho')->nullable();
+	        $table->string('flete')->nullable();
+	        $table->string('manejo')->nullable();
+	        $table->string('id_tcc')->nullable();
+	        
+	        
+	        
 	        
             $table->timestamps();
         });
