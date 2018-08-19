@@ -1,14 +1,19 @@
 <?php
 	
-	namespace App\Providers;
+	namespace App\Services;
 	
 	
-	use Queue;
-	use Illuminate\Support\ServiceProvider;
+	use App\Interfaces\SoapInterface;
+	
+	
 	use SoapClient;
 	
-	class SoapConsumeServiceProvider extends ServiceProvider
+	class SoapConsumeService implements SoapInterface
 	{
+		
+		public function register(){
+			return $this;
+		}
 		
 		private function _client($wsdl = '') {
 			$opts = array(
@@ -33,7 +38,7 @@
 			}
 			
 			catch ( \Exception $e) {
-				Log::info('Error en el cliente '. $e->getMessage());
+				return $e->getMessage();
 			}
 		}
 		
@@ -49,7 +54,7 @@
 			}
 			
 			catch (\Exception $e) {
-				Log::info('Caught Exception :'. $e->getMessage());
+				
 				return $e;       // just re-throw it
 			}
 			
@@ -57,10 +62,4 @@
 		
 		
 		
-		public function boot()
-		{
-			Queue::failing(function ($event) {
-			
-			});
-		}
 	}

@@ -16,7 +16,7 @@
 		 *
 		 * @var string
 		 */
-		protected $description = "Verifica los token generados por acceso en los ultimos 40 minutos.";
+		protected $description = "Verifica y elimina los token generados por acceso mayores a 40-45 minutos.";
 		/**
 		 * Execute the console command.
 		 *

@@ -5,10 +5,12 @@
 	use Illuminate\Http\Request;
 	use phpDocumentor\Reflection\Types\Mixed_;
 	use phpDocumentor\Reflection\Types\Object_;
-	
+
 	class ApiController extends Controller
 	{
-	    /**
+		
+		
+		/**
 		 * @param Request $request
 		 */
 		protected function getParameters(Request $request) {

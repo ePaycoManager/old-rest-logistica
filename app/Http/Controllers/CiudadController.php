@@ -16,31 +16,23 @@
 		
 		public function index(){
 			
-			$ciudades = $this->ciudad->listarPlano();
+			return $this->generateResponse($this->ciudad->listarPlano(),'true','200','Ciudades consultadas correctamente');
 			
-			$response = $this->generateResponse($ciudades,'true','200','Ciudades consultadas correctamente');
-			
-			return $response;
 		}
 		
 		
 		public function departamentos(){
+		
+			return $this->generateResponse($ciudades = $this->ciudad->listarDepartamentos(),'true','200','Departamentos consultados correctamente');
 			
-			$departamentos  = $ciudades = $this->ciudad->listarDepartamentos();
 			
-			$response = $this->generateResponse($departamentos,'true','200','Departamentos consultados correctamente');
-			
-			return $response;
 			
 		}
 		
 		public function ciudadesAgrupado(){
 			
-			$ciudadesAgrupado= $this->ciudad->listarAgrupadoDepartamentos();
-			
-			$response = $this->generateResponse($ciudadesAgrupado,'true','200','Ciudades agrupadas consultadas correctamente');
-			
-			return $response;
+			return $this->generateResponse($this->ciudad->listarAgrupadoDepartamentos(),'true','200','Ciudades agrupadas consultadas correctamente');
+	
 			
 		}
 	}
