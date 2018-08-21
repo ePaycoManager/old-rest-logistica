@@ -41,17 +41,17 @@ class RemesaController extends ApiController
 	    $GrabarDespacho4->objDespacho->clave='CLIENTETCC608W3A61CJ';//guardar en una tabla de configuracion general
 	   // $GrabarDespacho4->objDespacho->codigolote='';//guardar en una tabla de configuracion general
 	    $GrabarDespacho4->objDespacho->fechahoralote = $params['fechahoralote'];
-	    $GrabarDespacho4->objDespacho->numeroremesa = '';
-	    $GrabarDespacho4->objDespacho->numeroDepacho = '';
+	    $GrabarDespacho4->objDespacho->numeroremesa = $params['numeroremesa'];
+	    $GrabarDespacho4->objDespacho->numeroDepacho = $params['numeroDepacho'];
 	    $GrabarDespacho4->objDespacho->unidadnegocio = $params['unidadnegocio'];
 	    $GrabarDespacho4->objDespacho->fechadespacho = $params['fechadespacho'];
 	    $GrabarDespacho4->objDespacho->cuentaremitente = $params['cuentaremitente'];
-	    $GrabarDespacho4->objDespacho->sederemitente = '';
+	    $GrabarDespacho4->objDespacho->sederemitente =  $params['sederemitente'];
 	    $GrabarDespacho4->objDespacho->primernombreremitente = $params['primernombreremitente'];
-	    $GrabarDespacho4->objDespacho->segundonombreremitente = '';//$params['segundonombreremitente'];
-	    $GrabarDespacho4->objDespacho->primerapellidoremitente = '';//$params['primerapellidoremitente'];
-	    $GrabarDespacho4->objDespacho->segundoapellidoremitente = '';//$params['segundoapellidoremitente'];
-	    $GrabarDespacho4->objDespacho->razonsocialremitente = '';//$params['razonsocialremitente'];
+	    $GrabarDespacho4->objDespacho->segundonombreremitente = $params['segundonombreremitente'];
+	    $GrabarDespacho4->objDespacho->primerapellidoremitente = $params['primerapellidoremitente'];
+	    $GrabarDespacho4->objDespacho->segundoapellidoremitente =$params['segundoapellidoremitente'];
+	    $GrabarDespacho4->objDespacho->razonsocialremitente = $params['razonsocialremitente'];
 	    $GrabarDespacho4->objDespacho->naturalezaremitente = $params['naturalezaremitente'];
 	    $GrabarDespacho4->objDespacho->tipoidentificacionremitente = $params['tipoidentificacionremitente'];
 	    $GrabarDespacho4->objDespacho->identificacionremitente = $params['identificacionremitente'];
@@ -60,7 +60,7 @@ class RemesaController extends ApiController
 	    $GrabarDespacho4->objDespacho->ciudadorigen = $params['ciudadorigen'];
 	    $GrabarDespacho4->objDespacho->tipoidentificaciondestinatario = $params['tipoidentificaciondestinatario'];
 	    $GrabarDespacho4->objDespacho->identificaciondestinatario = $params['identificaciondestinatario'];
-	    $GrabarDespacho4->objDespacho->sededestinatario = '';
+	    $GrabarDespacho4->objDespacho->sededestinatario = $params['sededestinatario'];
 	    $GrabarDespacho4->objDespacho->primernombredestinatario = $params['primernombredestinatario'];
 	    $GrabarDespacho4->objDespacho->segundonombredestinatario = $params['segundonombredestinatario'];
 	    $GrabarDespacho4->objDespacho->primerapellidodestinatario = $params['primerapellidodestinatario'];
@@ -74,12 +74,12 @@ class RemesaController extends ApiController
 	    $GrabarDespacho4->objDespacho->totalpeso = $params['totalpeso'];
 	    $GrabarDespacho4->objDespacho->totalpesovolumen = $params['totalpesovolumen'];
 	    $GrabarDespacho4->objDespacho->totalvalormercancia = $params['totalvalormercancia'];
-	    $GrabarDespacho4->objDespacho->formapago = '';
+	    $GrabarDespacho4->objDespacho->formapago = $params['formapago'];
 	    $GrabarDespacho4->objDespacho->observaciones = $params['observaciones'];
-	    $GrabarDespacho4->objDespacho->llevabodega = '';
-	    $GrabarDespacho4->objDespacho->recogebodega = '';
-	    $GrabarDespacho4->objDespacho->centrocostos = '';
-	    $GrabarDespacho4->objDespacho->totalvalorproducto = '';
+	    $GrabarDespacho4->objDespacho->llevabodega = $params['llevabodega'];
+	    $GrabarDespacho4->objDespacho->recogebodega = $params['recogebodega'];
+	    $GrabarDespacho4->objDespacho->centrocostos = $params['centrocostos'];
+	    $GrabarDespacho4->objDespacho->totalvalorproducto = $params['totalvalorproducto'];
 	    
 	    $GrabarDespacho4->objDespacho->unidad = new Object_();
 	    $GrabarDespacho4->objDespacho->unidad->tipounidad = $params['tipounidad'];
@@ -93,25 +93,24 @@ class RemesaController extends ApiController
 	    $GrabarDespacho4->objDespacho->unidad->ancho = $params['ancho'];
 	    $GrabarDespacho4->objDespacho->unidad->pesovolumen = $params['pesovolumen'];
 	    $GrabarDespacho4->objDespacho->unidad->valormercancia = $params['valormercancia'];
-	    $GrabarDespacho4->objDespacho->unidad->codigobarras = '';
-	    $GrabarDespacho4->objDespacho->unidad->numerobolsa = '';
-	    $GrabarDespacho4->objDespacho->unidad->referencias = '';
+	    $GrabarDespacho4->objDespacho->unidad->codigobarras = $params['codigobarras'];
+	    $GrabarDespacho4->objDespacho->unidad->numerobolsa = $params['numerobolsa'];
+	    $GrabarDespacho4->objDespacho->unidad->referencias = $params['referencias'];
 	    
 	    
 	    $GrabarDespacho4->objDespacho->documentoreferencia = new Object_();
 	    $GrabarDespacho4->objDespacho->documentoreferencia->tipodocumento = $params['tipodocumento'];
 	    $GrabarDespacho4->objDespacho->documentoreferencia->numerodocumento = $params['numerodocumento'];
 	    $GrabarDespacho4->objDespacho->documentoreferencia->fechadocumento = $params['fechadocumento'];
-	    $GrabarDespacho4->objDespacho->numeroReferenciaCliente = '';
-	    $GrabarDespacho4->objDespacho->fuente = '';
+	    $GrabarDespacho4->objDespacho->numeroReferenciaCliente = $params['numeroReferenciaCliente'];
+	    $GrabarDespacho4->objDespacho->fuente = $params['fuente'];
 	    $GrabarDespacho4->objDespacho->generarDocumentos = true;
-	    $GrabarDespacho4->respuesta = '';
+	    $GrabarDespacho4->respuesta = '';//no definido en doc
 	
 	    $soapResponse = $this->soap->consumeSoap('',$GrabarDespacho4,$url,'GrabarDespacho4');
 	    
 	    $remesaTCC = new TccRemesa();
 	    $date = new \DateTime('now');
-	    //'url_relacion_envio','url_rotulos','img_relacion_envio','img_rotulos','mensaje_tcc'
 	    if($soapResponse->respuesta != "-1"){
 		    $remesaTCC->fecha_lote = $date;
 		    $remesaTCC->numero_remesa =  $soapResponse->remesa;
