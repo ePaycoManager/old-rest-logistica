@@ -21,9 +21,7 @@ class CotizarController extends ApiController
     {
     	if($operador != null) {
 	        if ($operador == 'tcc') {
-	        	$params = $this->getParameters($request);
-	        	
-	            return $cotizacion = $this->generateResponse($this->tccCotizacion($this->getParameters($request)),'true','200','Respuesta de TCC dada correctamente');
+	        	return $cotizacion = $this->generateResponse($this->tccCotizacion($this->getParameters($request)),'true','200','Respuesta de TCC dada correctamente');
 		    } else {
 		        return $this->generateResponse('','false','410',' Actualmente no contamos con el operador logistico seleccionado');
 	        }
@@ -40,17 +38,17 @@ class CotizarController extends ApiController
         $consultarliquidacion =  new Object_();
         $consultarliquidacion->Clave='CLIENTETCC608W3A61CJ';//guardar en una tabla de configuracion general
 	    $consultarliquidacion->Liquidacion = new Object_();
-	    $consultarliquidacion->Liquidacion->tipoenvio=$params['tipoenvio'];
+	    //$consultarliquidacion->Liquidacion->tipoenvio=$params['tipoenvio'];->esto  no tiene doc ni valor en el xml de ejemplo
 	    $consultarliquidacion->Liquidacion->idciudadorigen =$params['idciudadorigen'];
 	    $consultarliquidacion->Liquidacion->idciudaddestino =$params['idciudaddestino'];
 	    $consultarliquidacion->Liquidacion->valormercancia =$params['valormercancia'];
-	    $consultarliquidacion->Liquidacion->boomerang = 0;
+	    $consultarliquidacion->Liquidacion->boomerang = $params['boomerang'];//no afecta en nada el valor de la liquidacion por paqueteria
 	    $consultarliquidacion->Liquidacion->cuenta = 0;
 	    $consultarliquidacion->Liquidacion->fecharemesa = $params['fecharemesa'];
-	    $consultarliquidacion->Liquidacion->idunidadestrategicanegocio = 2;
+	    $consultarliquidacion->Liquidacion->idunidadestrategicanegocio = $params['idunidadestrategicanegocio'];;
 	    $consultarliquidacion->Liquidacion->unidades = new Object_();
 	    $consultarliquidacion->Liquidacion->unidades->unidad = new Object_();
-	    $consultarliquidacion->Liquidacion->unidades->unidad->numerounidades=$params['unidad']['numerounidades'];
+	    $consultarliquidacion->Liquidacion->unidades->unidad->numerounidades=$params['unidad']['numerounidades'];//que es esto??? afecta valor pero al cambiar cantidad de unidades no cambia valor retornado
 	    $consultarliquidacion->Liquidacion->unidades->unidad->pesoreal=$params['unidad']['pesoreal'];
 	    $consultarliquidacion->Liquidacion->unidades->unidad->pesovolumen=$params['unidad']['pesovolumen'];
 	    $consultarliquidacion->Liquidacion->unidades->unidad->alto=$params['unidad']['alto'];

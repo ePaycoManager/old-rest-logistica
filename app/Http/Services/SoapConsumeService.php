@@ -49,7 +49,9 @@
 				$this->client->__setSoapHeaders($headers);
 			}
 			try {
+				
 				$result = $this->client->$function($data);
+				
 				return $result;
 			}
 			
