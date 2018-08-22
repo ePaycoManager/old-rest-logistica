@@ -44,9 +44,10 @@
 					
 				} else {
 					$validar_comercio = $this->validarCliente( $public_key );
-					if ( $validar_comercio ) {
+					if ( $validar_comercio['status'] ) {
 						$user             = new User();
 						$user->public_key = $public_key;
+						$user->id_user_rest_pagos = $validar_comercio['id_user_rest_pagos'];
 						$user->save();
 						$api_token = sha1( $public_key . time() );
 						$create_token     = User::where( 'public_key', $user->public_key )->update( [ 'api_token' => $api_token ] );
@@ -96,7 +97,8 @@
 			
 			curl_close($curl);
 			$response = json_decode($response);
-			
+			$respuesta = array('status' => $response->success, 'id_user_rest_pagos' => $response->data->Id);
+			return $respuesta;
 			if ($err) {
 				return false;
 			} else {

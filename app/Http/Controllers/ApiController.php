@@ -5,9 +5,17 @@
 	use Illuminate\Http\Request;
 
 	use phpDocumentor\Reflection\Types\Object_;
+	use App\Interfaces\SoapInterface;
+	use App\Interfaces\UserInterface;
 
 	class ApiController extends Controller
 	{
+		public function __construct(SoapInterface $soap, UserInterface $user_interface)
+		{
+			$this->soap = $soap;
+			$this->user_interface = $user_interface;
+		}
+		
 		
 		
 		/**

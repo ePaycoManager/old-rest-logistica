@@ -13,16 +13,13 @@ use phpDocumentor\Reflection\Types\Object_;
 
 class RemesaController extends ApiController
 {
-	public function __construct(SoapInterface $soap)
-	{
-		$this->soap = $soap;
-	}
+	
 	
 	public function Remesa(Request $request, $operador = null)
     {
     	if($operador != null) {
 	        if ($operador == 'tcc') {
-	        	return $cotizacion = $this->generateResponse($this->tccRemesa($this->getParameters($request)),'true','200','Respuesta de TCC dada correctamente');
+	        	return $cotizacion = $this->generateResponse($this->tccRemesa($this->getParameters($request), $request),'true','200','Respuesta de TCC dada correctamente');
 		    } else {
 		        return $this->generateResponse('','false','410',' Actualmente no contamos con el operador logistico seleccionado');
 	        }
@@ -33,7 +30,7 @@ class RemesaController extends ApiController
     }
     
     
-    protected function tccRemesa($params){
+    protected function tccRemesa($params, Request $request){
 		$url = 'http://clientes.tcc.com.co/preservicios/wsdespachos.asmx?wsdl';//guardar en una tabla de configuracion general
 	
 	    $GrabarDespacho4 =  new Object_();
@@ -147,6 +144,7 @@ class RemesaController extends ApiController
 		    $remesaTCC->img_relacion_envio =  $soapResponse->IMGRelacionEnvio;
 		    $remesaTCC->img_rotulos =  $soapResponse->IMGRotulos;
 		    $remesaTCC->mensaje_tcc =  $soapResponse->mensaje;
+		    $remesaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->get('api_token'));
 		    $remesaTCC->save();
 		    $remesa =  TccRemesa::find($remesaTCC->id);
 		    // aca logica de negocio

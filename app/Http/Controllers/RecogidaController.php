@@ -13,16 +13,13 @@ use phpDocumentor\Reflection\Types\Object_;
 
 class RecogidaController extends ApiController
 {
-	public function __construct(SoapInterface $soap)
-	{
-		$this->soap = $soap;
-	}
+	
 	
 	public function Recogida(Request $request, $operador = null)
     {
     	if($operador != null) {
 	        if ($operador == 'tcc') {
-	        	return $cotizacion = $this->generateResponse($this->tccRecogida($this->getParameters($request)),'true','200','Respuesta de TCC dada correctamente');
+	        	return $cotizacion = $this->generateResponse($this->tccRecogida($this->getParameters($request),$request),'true','200','Respuesta de TCC dada correctamente');
 		    } else {
 		        return $this->generateResponse('','false','410',' Actualmente no contamos con el operador logistico seleccionado');
 	        }
@@ -33,7 +30,7 @@ class RecogidaController extends ApiController
     }
     
     
-    protected function tccRecogida($params){
+    protected function tccRecogida($params, Request $request){
 		$url = 'http://clientes.tcc.com.co/preservicios/wsrecogidas.asmx?wsdl';//guardar en una tabla de configuracion general
 	
 	    $solicitarRecogida =  new Object_();
@@ -108,6 +105,8 @@ class RecogidaController extends ApiController
 		    $recogidaTCC->valor_mercancia = $solicitarRecogida->SolicitudRecogida->Servicio->ValorMercancia;
 		    $recogidaTCC->observaciones = $solicitarRecogida->SolicitudRecogida->Servicio->Observaciones;
 		    $recogidaTCC->cdpago = $solicitarRecogida->SolicitudRecogida->Servicio->CDPago;
+		    $recogidaTCC->id_tcc = $soapResponse->recogida;
+		    $recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->get('api_token'));
 		    $recogidaTCC->save();
 		    $recogidaTCC = TccRecogida::find( $recogidaTCC->id );
 		

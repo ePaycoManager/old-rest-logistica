@@ -16,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind('App\Interfaces\CiudadInterface','App\Repositories\CiudadRepository');
 	    $this->app->bind('App\Interfaces\SoapInterface','App\Services\SoapConsumeService');
+	    $this->app->bind('App\Interfaces\UserInterface','App\Repositories\UserRepository');
 	    
     }
 }
