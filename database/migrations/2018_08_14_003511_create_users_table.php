@@ -18,6 +18,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('public_key')->unique();
             $table->string('api_token');
+	        $table->string('id_user_rest_pagos');
             $table->timestamps();
         });
     }

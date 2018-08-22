@@ -18,9 +18,7 @@ $router->get('/', function () use ($router) {
 $router->post('/login',  ['uses' => 'LoginController@login']);
 //resto de rutas
 $router->group(['prefix' => 'api','middleware' => 'auth'], function () use ($router) {
-    $router->post('/{operador}/cotizar',  ['uses' => 'CotizarController@cotizar']);
-	$router->post('/{operador}/remesa',  ['uses' => 'RemesaController@remesa']);
-	$router->post('/{operador}/recogida',  ['uses' => 'RecogidaController@recogida']);
+    $router->post('/{operador}/{operacion}',  ['uses' => 'IndexController@index']);
 	$router->get('/ciudades','CiudadController@index');
 	$router->get('/departamentos','CiudadController@departamentos');
 	$router->get('/ciudades/agrupado','CiudadController@ciudadesAgrupado');

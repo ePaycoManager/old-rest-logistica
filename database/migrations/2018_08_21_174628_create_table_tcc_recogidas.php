@@ -41,6 +41,8 @@ class CreateTableTccRecogidas extends Migration
 	        $table->string('valor_mercancia')->nullable();
 	        $table->string('observaciones')->nullable();
 	        $table->string('cdpago')->nullable();
+	        $table->string('id_tcc')->nullable();
+	        $table->string('id_user')->nullable();
             $table->timestamps();
         });
     }

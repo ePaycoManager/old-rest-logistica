@@ -3,20 +3,14 @@
 	namespace App\Http\Controllers;
 	
 	use Illuminate\Http\Request;
-
-	use phpDocumentor\Reflection\Types\Object_;
-	use App\Interfaces\SoapInterface;
-	use App\Interfaces\UserInterface;
+	use App\Interfaces\OperacionesInterface;
 
 	class ApiController extends Controller
 	{
-		public function __construct(SoapInterface $soap, UserInterface $user_interface)
+		public function __construct(OperacionesInterface $op)
 		{
-			$this->soap = $soap;
-			$this->user_interface = $user_interface;
+			$this->operaciones = $op;
 		}
-		
-		
 		
 		/**
 		 * @param Request $request
@@ -41,8 +35,8 @@
 		 * @param Mixed $message
 		 */
 		
-		protected function generateResponse($data = '',$status = '', $code='',$message = ''){
-			$response  = new Object_();
+		protected function generateResponse($data = '',$status = '', $code = '',$message = ''){
+			$response  =  new \stdClass;
 			$response->status = '';
 			$response->code = '';
 			$response->message = '';

@@ -34,6 +34,7 @@ class CreateTableTccCotizaciones extends Migration
 	        $table->string('flete')->nullable();
 	        $table->string('manejo')->nullable();
 	        $table->string('id_tcc')->nullable();
+	        $table->string('id_user')->nullable();
 	        
 	        
 	        
