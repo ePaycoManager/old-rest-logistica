@@ -23,8 +23,12 @@
 				$params = json_decode($request->getContent(),true);
 				
 			} else {
-				$params = [];
+				
+				$params = $request->getContent();
+				
 			}
+			
+			
 			
 			return $params;
 		}

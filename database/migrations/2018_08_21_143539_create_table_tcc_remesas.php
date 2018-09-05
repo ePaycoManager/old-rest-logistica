@@ -52,6 +52,7 @@ class CreateTableTccRemesas extends Migration
 	        $table->string('img_rotulos')->nullable();
 	        $table->string('mensaje_tcc')->nullable();
 	        $table->string('id_user')->nullable();
+	        $table->string('id_cotizacion')->nullable();
 	        
 	        
 	        

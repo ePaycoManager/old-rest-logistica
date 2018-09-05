@@ -30,7 +30,8 @@
 			
 			try {
 				$this->client = new SoapClient($wsdl, array(
-						'stream_context' => $context, 'trace' => true,
+						'stream_context' => $context,
+						'trace' => true
 						)
 				);
 				
@@ -57,7 +58,7 @@
 			
 			catch (\Exception $e) {
 				
-				return $e;       // just re-throw it
+				return $e;
 			}
 			
 		}

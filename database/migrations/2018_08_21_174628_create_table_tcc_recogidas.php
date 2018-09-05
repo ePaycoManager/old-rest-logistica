@@ -43,6 +43,7 @@ class CreateTableTccRecogidas extends Migration
 	        $table->string('cdpago')->nullable();
 	        $table->string('id_tcc')->nullable();
 	        $table->string('id_user')->nullable();
+	        $table->string('id_remesa')->nullable();
             $table->timestamps();
         });
     }
