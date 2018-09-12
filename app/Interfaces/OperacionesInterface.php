@@ -12,4 +12,5 @@
 		public function listaGuias($data, Request $request);
 		public function configuracionUsuario($data, Request $request);
 		public function configuracionEditar($data, Request $request);
+		public function configuracionNuevo($data, Request $request);
 	}

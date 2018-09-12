@@ -230,7 +230,7 @@
 					$remesaTCC->img_relacion_envio = $soapResponse->IMGRelacionEnvio;
 					$remesaTCC->img_rotulos        = $soapResponse->IMGRotulos;
 					$remesaTCC->mensaje_tcc        = $soapResponse->mensaje;
-					$remesaTCC->id_user            = $this->user_interface->getIdUserRestPagos( $request->get( 'api_token' ) );
+					$remesaTCC->id_user            = $this->user_interface->getIdUserRestPagos( $request->header( 'php-auth-user' ) );
 					$remesaTCC->id_cotizacion = $cotizacion['id'];
 					$remesaTCC->total_peso =$data['kilos_reales'];
 					$remesaTCC->total_valor_mercancia = $data['valor_mercancia'];
@@ -294,7 +294,6 @@
 					
 					}else{
 						$operacionEpayco->recogida_automatica = false;
-						$operacionEpayco->recogido = false;
 						$operacionEpayco->save();
 						$recogida = 'No tiene activo el servicio de recogida automatica';
 					}
@@ -407,7 +406,7 @@
 						$recogidaTCC->observaciones = $solicitarRecogida->SolicitudRecogida->Servicio->Observaciones;
 						$recogidaTCC->cdpago = $solicitarRecogida->SolicitudRecogida->Servicio->CDPago;
 						$recogidaTCC->id_tcc = $soapResponse->recogida;
-						$recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->get('api_token'));
+						$recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
 						$recogidaTCC->save();
 						$recogidaTCC = TccRecogida::find( $recogidaTCC->id );
 						
@@ -427,7 +426,9 @@
 					}
 				} else if(isset($data['id_guia']) ){
 					//aca logica para consultar la remesa
-					$opPayco = DB::table('operaciones_epayco')->select('*')->where('id',$data['id_guia'])->first();
+					$opPayco = OperacionesEpayco::find(['id'=>$data['id_guia']])->first();
+					
+					
 					if($opPayco){
 						$remesa = DB::table('tcc_remesas')->select('*')->where('id',$opPayco->id_operacion_operador)->first();
 					} else{
@@ -483,7 +484,7 @@
 					$recogidaTCC = new TccRecogida();
 					$date = new \DateTime('now');
 					
-					if($soapResponse->recogida != -1 && $opPayco->recogido == null) {
+					if($soapResponse->recogida != -1 && $opPayco->recogido == null) {// agregar if anidado para validar etado de opPayco aparte, ademas debe reintentar solicitud de recogida en caso de que la respuesta contenga este string "dia no hábil."
 						
 						$recogidaTCC->id_cliente  = $solicitarRecogida->SolicitudRecogida->Solicitante->IDCliente;
 						$recogidaTCC->cuenta_cliente = $solicitarRecogida->SolicitudRecogida->Solicitante->Cuenta;
@@ -511,9 +512,11 @@
 						$recogidaTCC->observaciones = $solicitarRecogida->SolicitudRecogida->Servicio->Observaciones;
 						$recogidaTCC->cdpago = $solicitarRecogida->SolicitudRecogida->Servicio->CDPago;
 						$recogidaTCC->id_tcc = $soapResponse->recogida;
-						$recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->get('api_token'));
+						$recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
 						$recogidaTCC->save();
 						$recogidaTCC = TccRecogida::find( $recogidaTCC->id );
+						$opPayco->recogido = $recogidaTCC->id;
+						$opPayco->save();
 						
 						$response = array(
 							'id'=>$recogidaTCC->id_tcc,
@@ -529,6 +532,9 @@
 					}
 					else {
 						$recogida = DB::table('tcc_recogidas')->select('*')->where('id',$opPayco->recogido)->first();
+						if($recogida==null){
+							$recogida = $soapResponse;
+						}
 						$response = array(
 							'message'=>'No se puede generar recogida para esta guia porque ya hay una solicitud.',
 							'recogida'=>$recogida
@@ -675,7 +681,7 @@
 			try{
 				
 				$idUsuarioRest = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
-				$config = ConfiguracionUsuario::find(['id_usuario_rest_pagos'=>$idUsuarioRest,'id'=>$data['id_configuracion']])->get()->first();
+				$config = ConfiguracionUsuario::find(['id_usuario_rest_pagos'=>$idUsuarioRest,'id'=>$data['id_configuracion']])->first();
 				if($config){
 					if(isset($data['direccion']) && $data['direccion'] != '' ) {
 						$config->direccion = $data['direccion'];
@@ -708,7 +714,7 @@
 					}
 					if(isset($data['tipo_persona']) && $data['tipo_persona'] != '' ){
 						if($data['tipo_persona'] == 'N' || $data['tipo_persona'] == 'J'){
-							$config->tipo_documento=$data['tipo_persona'];
+							$config->tipo_persona=$data['tipo_persona'];
 						} else {
 							return 'El tipo persona no es valido';
 						}
@@ -716,7 +722,7 @@
 					}
 					if(isset($data['recogida_automatica']) && $data['recogida_automatica'] != '' ){
 						if($data['recogida_automatica'] == 'true' || $data['recogida_automatica'] == 'false'){
-							$config->tipo_documento=$data['recogida_automatica'];
+							$config->recogida_automatica=$data['recogida_automatica'];
 						} else {
 							return 'El parametro dado para recogida automatica no es valido';
 						}
@@ -724,7 +730,7 @@
 					}
 					
 					if(isset($data['dias']) && $data['dias'] != '' &&  $data['recogida_automatica'] == "true"){
-						if($data['dias'] == 'T' || strlen($data['dias'] == 13)){
+						if($data['dias'] == 'T' || strlen($data['dias'] == 11)){
 							$config->dias=$data['dias'];
 						}
 					}
@@ -734,94 +740,20 @@
 							$config->segmento=$data['segmento'];
 						}
 					}
+					if(isset($data['tag']) && $data['tag'] != ''){
+						$config->tag = $data['tag'];
+					}
 					
 					
 					
 					$config->save();
-					return 'Configuracion guardada satisfactoriamente';
+					$response = array(
+						"message"=>'Configuracion guardada satisfactoriamente',
+						"data"=>$config
+					);
+					return $response;
 					
 					
-				} else {
-					$newConfig =  new ConfiguracionUsuario();
-					if(isset($data['direccion']) && $data['direccion'] != '' ) {
-						$newConfig->direccion = $data['direccion'];
-					} else {
-						return 'La direccion es un parametro obligatorio';
-					}
-					if(isset($data['telefono']) && $data['telefono'] != '' ){
-						$newConfig->telefono=$data['telefono'];
-					} else {
-						return 'El telefono es un parametro obligatorio';
-					}
-					if(isset($data['ciudad']) && $data['ciudad'] != '' ){
-						$validateCiudad = $this->ciudad_inteface->validarCiudad($data['ciudad']);
-						if($validateCiudad){
-							$newConfig->ciudad=$data['ciudad'];
-						} else {
-							return 'El codigo ingresado para la ciudad no existe';
-						}
-						
-					} else {
-						return 'La  ciudad es un parametro obligatorio';
-					}
-					if(isset($data['nombre']) && $data['nombre'] != '' ){
-						$newConfig->nombre=$data['nombre'];
-					} else {
-						return 'El nombre ciudad es un parametro obligatorio';
-					}
-					if(isset($data['documento']) && $data['documento'] != '' ){
-						$newConfig->documento=$data['documento'];
-					} else {
-						return 'El documento es un parametro obligatorio';
-					}
-					if(isset($data['tipo_documento']) && $data['tipo_documento'] != '' ){
-						if($data['tipo_documento'] == 'CC' || $data['tipo_documento'] == 'NIT'){
-							$newConfig->tipo_documento=$data['tipo_documento'];
-						} else {
-							return 'El tipo documento no es valido';
-						}
-						
-					} else {
-						return 'El tipo_documento es un parametro obligatorio';
-					}
-					if(isset($data['tipo_persona']) && $data['tipo_persona'] != '' ){
-						if($data['tipo_persona'] == 'N' || $data['tipo_persona'] == 'J'){
-							$newConfig->tipo_documento=$data['tipo_persona'];
-						} else {
-							return 'El tipo persona no es valido';
-						}
-						
-					} else {
-						return 'El tipo persona es un parametro obligatorio';
-					}
-					if(isset($data['recogida_automatica']) && $data['recogida_automatica'] != '' ){
-						if($data['recogida_automatica'] == 'true' || $data['recogida_automatica'] == 'false'){
-							$newConfig->tipo_documento=$data['recogida_automatica'];
-						} else {
-							return 'El parametro dado para recogida automatica no es valido';
-						}
-						
-					} else {
-						return 'El parametro recogida automatica es obligatorio';
-					}
-					
-					if(isset($data['dias']) && $data['dias'] != '' &&  $data['recogida_automatica'] == "true"){
-						if($data['dias'] == 'T' || strlen($data['dias'] == 13)){
-							$newConfig->dias=$data['dias'];
-						} else {
-							return 'El parametro dado para dias no es valido';
-						}
-					}
-					
-					if(isset($data['segmento']) && $data['segmento'] != '' &&  $data['recogida_automatica'] == "true"){
-						if($data['segmento'] == 'M' || $data['segmento'] == 'T'){
-							$newConfig->segmento=$data['segmento'];
-						} else {
-							return 'El parametro dado para segmento no es valido';
-						}
-					}
-					$newConfig->save();
-					return 'Configuracion guardada satisfactoriamente';
 				}
 				
 			} catch (\Exception $e){
@@ -832,103 +764,107 @@
 			
 		}
 		
+		public function configuracionNuevo($data, Request $request){
+			try{
+				$idUsuario = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
+				$newConfig =  new ConfiguracionUsuario();
+				$newConfig->id_usuario_rest_pagos = $idUsuario;
+				if(isset($data['direccion']) && $data['direccion'] != '' ) {
+					$newConfig->direccion = $data['direccion'];
+				} else {
+					return 'La direccion es un parametro obligatorio';
+				}
+				if(isset($data['telefono']) && $data['telefono'] != '' ){
+					$newConfig->telefono=$data['telefono'];
+				} else {
+					return 'El telefono es un parametro obligatorio';
+				}
+				if(isset($data['ciudad']) && $data['ciudad'] != '' ){
+					$validateCiudad = $this->ciudad_inteface->validarCiudad($data['ciudad']);
+					if($validateCiudad){
+						$newConfig->ciudad=$data['ciudad'];
+					} else {
+						return 'El codigo ingresado para la ciudad no existe';
+					}
+					
+				} else {
+					return 'La  ciudad es un parametro obligatorio';
+				}
+				if(isset($data['nombre']) && $data['nombre'] != '' ){
+					$newConfig->nombre=$data['nombre'];
+				} else {
+					return 'El nombre es un parametro obligatorio';
+				}
+				if(isset($data['documento']) && $data['documento'] != '' ){
+					$newConfig->documento=$data['documento'];
+				} else {
+					return 'El documento es un parametro obligatorio';
+				}
+				if(isset($data['tipo_documento']) && $data['tipo_documento'] != '' ){
+					if($data['tipo_documento'] == 'CC' || $data['tipo_documento'] == 'NIT'){
+						$newConfig->tipo_documento=$data['tipo_documento'];
+					} else {
+						return 'El tipo documento no es valido';
+					}
+					
+				} else {
+					return 'El tipo_documento es un parametro obligatorio';
+				}
+				if(isset($data['tipo_persona']) && $data['tipo_persona'] != '' ){
+					if($data['tipo_persona'] == 'N' || $data['tipo_persona'] == 'J'){
+						$newConfig->tipo_persona=$data['tipo_persona'];
+					} else {
+						return 'El tipo persona no es valido';
+					}
+					
+				} else {
+					return 'El tipo persona es un parametro obligatorio';
+				}
+				if(isset($data['recogida_automatica']) && $data['recogida_automatica'] != '' ){
+					if($data['recogida_automatica'] == 'true' || $data['recogida_automatica'] == 'false'){
+						$newConfig->recogida_automatica=$data['recogida_automatica'];
+					} else {
+						return 'El parametro dado para recogida automatica no es valido';
+					}
+					
+				} else {
+					return 'El parametro recogida automatica es obligatorio';
+				}
+				
+				if(isset($data['dias']) && $data['dias'] != '' &&  $data['recogida_automatica'] == "true"){
+					if($data['dias'] == 'T' || strlen($data['dias'] == 11)){
+						$newConfig->dias=$data['dias'];
+					} else {
+						return 'El parametro dado para dias no es valido';
+					}
+				}
+				
+				if(isset($data['segmento']) && $data['segmento'] != '' &&  $data['recogida_automatica'] == "true"){
+					if($data['segmento'] == 'M' || $data['segmento'] == 'T'){
+						$newConfig->segmento=$data['segmento'];
+					} else {
+						return 'El parametro dado para segmento no es valido';
+					}
+				}
+				if(isset($data['tag']) && $data['tag'] != ''){
+					$newConfig->tag = $data['tag'];
+				}
+				
+				$newConfig->save();
+				$response = array(
+					"message"=>'Configuracion guardada satisfactoriamente',
+					"data"=>$newConfig
+			);
+				return $response;
+			
+			} catch (\Exception $e){
+				return $e;
+			}
+			
+		}
+		
 		//fin operaciones Configuracion
 	}
 	
 	
 	
-	// request minimos solicitados
-	//{
-	//	   "unidadnegocio":"2",
-	//	   "fechadespacho":"2018-09-04",
-	//	   "cuentaremitente":"1114100",
-	//	   "razonsocialremitente":"",
-	//	   "tipoidentificacionremitente":"NIT",
-	//	   "primernombreremitente":"CLIENTE GENERICO DE TCC",
-	//	   "segundonombreremitente":"",
-	//	   "primerapellidoremitente":"",
-	//	   "segundoapellidoremitente":"",
-	//	   "ciudadorigen":"05001000",
-	//	   "razonsocialdestinatario":"",
-	//	   "tipoidentificaciondestinatario":"CC",
-	//	   "primernombredestinatario":"PRUEBA DE SERVICIO WEB",
-	//	   "segundonombredestinatario":"",
-	//	   "primerapellidodestinatario":"",
-	//	   "segundoapellidodestinatario":"",
-	//	   "direcciondestinatario":"CRA 1 362N-231",
-	//	   "ciudaddestinatario":"05001000",
-	//	   "tipounidad":"TIPO_UND_DOCB",
-	//	   "cantidadunidades":"1",
-	//	   "pesovolumen":"0",
-	//	   "valormercancia":"0",
-	//	   "kilosreales":"2"
-	//
-	//}
-	
-	
-	//request complete remesa
-
-
-//"codigolote":"",
-//	   "fechahoralote":"2018-04-04",
-//	   "numeroremesa":"",
-//	   "numeroDepacho":"",
-//	   "unidadnegocio":"1",
-//	   "fechadespacho":"2018-09-04",
-//	   "cuentaremitente":"1114100",
-//	   "sederemitente":"",
-//	   "primernombreremitente":"CLIENTE GENERICO DE TCC",
-//	   "segundonombreremitente":"",
-//	   "primerapellidoremitente":"",
-//	   "segundoapellidoremitente":"",
-//	   "razonsocialremitente":"",
-//	   "naturalezaremitente":"J",
-//	   "tipoidentificacionremitente":"NIT",
-//	   "identificacionremitente":"89090031",
-//	   "telefonoremitente":"1234567",
-//	   "direccionremitente":"CLL FALSA 123",
-//	   "ciudadorigen":"05001000",
-//	   "tipoidentificaciondestinatario":"CC",
-//	   "identificaciondestinatario":"1061529633",
-//	   "sededestinatario":"",
-//	   "primernombredestinatario":"PRUEBA DE SERVICIO WEB",
-//	   "segundonombredestinatario":"",
-//	   "primerapellidodestinatario":"",
-//	   "segundoapellidodestinatario":"",
-//	   "razonsocialdestinatario":"",
-//	   "naturalezadestinatario":"N",
-//	   "direcciondestinatario":"CRA 1 362N-231",
-//	   "telefonodestinatario":"6852828",
-//	   "ciudaddestinatario":"05001000",
-//	   "barriodestinatario":"",
-//	   "totalpeso":"0",
-//	   "totalpesovolumen":"0",
-//	   "totalvalormercancia":"0",
-//	   "formapago":"",
-//	   "observaciones":"ESTO ES UNA PRUEBA Y SE DEBE ANULAR",
-//	   "llevabodega":"",
-//	   "recogebodega":"",
-//	   "centrocostos":"",
-//	   "totalvalorproducto":"",
-//	   "tipounidad":"TIPO_UND_DOCB",
-//	   "tipoempaque":"",
-//	   "claseempaque":"CLEM_SOBRE",
-//	   "dicecontener":"BOOMERANG",
-//	   "cantidadunidades":"1",
-//	   "kilosreales":"0",
-//	   "largo":"0",
-//	   "alto":"0",
-//	   "ancho":"0",
-//	   "pesovolumen":"0",
-//	   "valormercancia":"0",
-//	   "codigobarras":"",
-//	   "numerobolsa":"",
-//	   "referencias":"",
-//	   "tipodocumento":"FA",
-//	   "numerodocumento":"F12-1234569",
-//	   "fechadocumento":"2016-06-1",
-//	   "numeroReferenciaCliente":"",
-//	   "fuente":""
-
-
-//o8usw9eyem
