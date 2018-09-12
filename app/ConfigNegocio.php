@@ -23,7 +23,7 @@ class ConfigNegocio extends Model
 	//	        //	        $table->string('tipo');
 	//	        //	        $table->string('valor');
    
-    protected $fillable = ['id','operador','operacion','regla','tipo','valor','id_cliente'];
+    protected $fillable = ['id','id_cliente','usuario_epayco','url_cotizar','url_guia','url_recogida','porcentaje_recogida','porcentaje_guia','procentaje_cotizar','operador','activo'];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -31,7 +31,7 @@ class ConfigNegocio extends Model
      * @var array
      */
     protected $hidden = [
-        'valor_operador'
+    
     ];
 }
 

@@ -27,4 +27,28 @@
 			
 			return $response;
 		}
+		
+		public function validarCiudad($codigo) {
+			
+			$validate = DB::table('ciudades')->where('codigo_dane',$codigo)->get()->first();
+			
+			if($validate){
+				return true;
+			} else {
+				return false;
+			}
+			
+		}
+		
+		public function codigoTcc($codigo) {
+			
+			$ciudad = DB::table('ciudades')->where('codigo_dane',$codigo)->get()->first();
+			
+			if($ciudad){
+				return $ciudad->codigo_tcc;
+			} else {
+				return false;
+			}
+			
+		}
 	}

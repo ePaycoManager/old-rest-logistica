@@ -9,17 +9,10 @@
 	class LoginController extends Controller {
 		public function login( Request $request ) {
 			
-//			$rules = [
-//				'public_key' => 'required',
-//			];
-//
-//			$customMessages = [
-//				'required' => ':attribute tidak boleh kosong'
-//			];
-//			$this->validate( $request, $rules, $customMessages );
+
 			$public_key = $request->header( 'php-auth-user' );
 			try {
-				$login = User::where( 'public_key', $public_key )->first();
+				$login = User::where( 'public_key', $public_key )->get()->first();
 				if ( $login ) {
 					
 					try {

@@ -16,14 +16,14 @@ class Authenticate
     public function handle($request, Closure $next, $guard = null)
     {
         if ($this->auth->guard($guard)->guest()) {
-            if ($request->has('api_token')) {
+        	$token = $public_key = $request->header( 'php-auth-user' );
+            if ($token != null) {
                 try {
-                    $token = $request->input('api_token');
+                    
                     $check_token = User::where('api_token', $token)->first();
                     if ($check_token) {
-                        $res['status'] = false;
-                        $res['message'] = 'Sin autorización.';
-                        return response($res, 401);
+	                    return $next($request);
+                     
                     } else {
 	                    $res['status'] = false;
 	                    $res['message'] = 'Por favor haga login.';
