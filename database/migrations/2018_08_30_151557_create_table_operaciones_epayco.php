@@ -28,7 +28,7 @@ class CreateTableOperacionesEpayco extends Migration
 	        $table->float('flete_epayco')->nullable();
 	        $table->float('manejo_epayco')->nullable();
 	        $table->string('factura_cliente')->nullable();
-	        $table->boolean('recogido')->nullable();
+	        $table->boolean('id_recogida')->nullable();
 	        $table->boolean('recogida_automatica')->nullable();
             $table->timestamps();
         });

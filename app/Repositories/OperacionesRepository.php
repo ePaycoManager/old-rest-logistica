@@ -5,13 +5,11 @@
 	use App\Interfaces\SoapInterface;
 	use App\Interfaces\UserInterface;
 	use Illuminate\Support\Facades\DB;
-	use App\User;
 	use Illuminate\Http\Request;
 	use App\TccLiquidacion;
 	use App\TccRecogida;
 	use App\TccRemesa;
 	use App\OperacionesEpayco;
-	use App\ConfigNegocio;
 	use App\ConfiguracionUsuario;
 	use App\Interfaces\CiudadInterface;
 	use App\Interfaces\ConfigNegocioInterface;
@@ -46,7 +44,7 @@
 			$consultarliquidacion->Liquidacion->boomerang = 0;//no aplica para cotizaciones pero el soap no funciona si no se envia
 			$consultarliquidacion->Liquidacion->cuenta = 0; // aca va codigo de ePayco para tarifa - mensajeria siempre cotiza full - para paquetes si el dcto es pie factura no muestra valores del convenio
 			$fecha = new \DateTime('now');
-			$consultarliquidacion->Liquidacion->fecharemesa = isset($data['fecha_despacho'])?$data['fecha_despacho']:$fecha->format('m/d/Y');
+			$consultarliquidacion->Liquidacion->fecharemesa = isset($data['fecha_guia'])?$data['fecha_guia']:$fecha->format('m/d/Y');
 			if($data['tipo_envio'] == '1' || $data['tipo_envio'] == '2'){
 				$consultarliquidacion->Liquidacion->idunidadestrategicanegocio = $data['tipo_envio'];// 2 siempre superpone unidad 1 - -  mensajeria solo cotiza de a 1 unidad
 			} else {
@@ -162,7 +160,7 @@
 					if($data['tipo_envio'] == '1'){
 						$tipoUnidad = 'TIPO_UND_PAQ';
 					} else {
-						$tipoUnidad = 'TIPO_UND_DOCB';
+						$tipoUnidad = 'TIPO_UND_DOCD';
 					}
 				}else {
 					return 'El tipo envio no tiene un parametro valido';
@@ -203,7 +201,7 @@
 				
 				$remesaTCC = new TccRemesa();
 				$date = new \DateTime('now');
-				if($soapResponse->respuesta != "-1") {
+				if($soapResponse->respuesta != "-1" && $soapResponse->remesa != "-1") {
 					$remesaTCC->fecha_lote                 = $date;
 					$remesaTCC->numero_remesa              = $soapResponse->remesa;
 					$remesaTCC->unidad_negocio             = $GrabarDespacho4->objDespacho->unidadnegocio;
@@ -251,7 +249,7 @@
 						if(!$ciudadRecogida){
 							return 'No se posee actualmente servicio de recogida en esa ciudad, por favor desactive el servicio de recogida automatica en la configuracion';
 						}
-						if($configUsuario->segmento == 'M'){
+						if($configUsuario->segmento == 'AM'){
 							$horaInicial = '09:00:00';
 							$horaFinal = '12:00:00';
 						} else {
@@ -289,7 +287,7 @@
 						);
 						$operacionEpayco->recogida_automatica = true;
 						$recogida = $this->tccRecogida($dataRecogida,$request);
-						$operacionEpayco->recogido = $recogida->id_operacion;
+						$operacionEpayco->id_recogida = $recogida['id_operacion'];
 						$operacionEpayco->save();
 					
 					}else{
@@ -484,7 +482,7 @@
 					$recogidaTCC = new TccRecogida();
 					$date = new \DateTime('now');
 					
-					if($soapResponse->recogida != -1 && $opPayco->recogido == null) {// agregar if anidado para validar etado de opPayco aparte, ademas debe reintentar solicitud de recogida en caso de que la respuesta contenga este string "dia no hábil."
+					if($soapResponse->recogida != -1 && $opPayco->id_recogida == null) {// agregar if anidado para validar etado de opPayco aparte, ademas debe reintentar solicitud de recogida en caso de que la respuesta contenga este string "dia no hábil."
 						
 						$recogidaTCC->id_cliente  = $solicitarRecogida->SolicitudRecogida->Solicitante->IDCliente;
 						$recogidaTCC->cuenta_cliente = $solicitarRecogida->SolicitudRecogida->Solicitante->Cuenta;
@@ -515,7 +513,7 @@
 						$recogidaTCC->id_user = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
 						$recogidaTCC->save();
 						$recogidaTCC = TccRecogida::find( $recogidaTCC->id );
-						$opPayco->recogido = $recogidaTCC->id;
+						$opPayco->id_recogida = $recogidaTCC->id;
 						$opPayco->save();
 						
 						$response = array(
@@ -531,7 +529,7 @@
 						return $response;
 					}
 					else {
-						$recogida = DB::table('tcc_recogidas')->select('*')->where('id',$opPayco->recogido)->first();
+						$recogida = DB::table('tcc_recogidas')->select('*')->where('id',$opPayco->id_recogida)->first();
 						if($recogida==null){
 							$recogida = $soapResponse;
 						}
@@ -736,7 +734,7 @@
 					}
 					
 					if(isset($data['segmento']) && $data['segmento'] != '' &&  $data['recogida_automatica'] == "true"){
-						if($data['segmento'] == 'M' || $data['segmento'] == 'T'){
+						if($data['segmento'] == 'AM' || $data['segmento'] == 'PM'){
 							$config->segmento=$data['segmento'];
 						}
 					}
@@ -840,7 +838,7 @@
 				}
 				
 				if(isset($data['segmento']) && $data['segmento'] != '' &&  $data['recogida_automatica'] == "true"){
-					if($data['segmento'] == 'M' || $data['segmento'] == 'T'){
+					if($data['segmento'] == 'AM' || $data['segmento'] == 'PM'){
 						$newConfig->segmento=$data['segmento'];
 					} else {
 						return 'El parametro dado para segmento no es valido';
