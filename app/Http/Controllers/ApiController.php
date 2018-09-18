@@ -21,6 +21,9 @@
 			if($request->getContent() !== "") {
 			
 				$params = json_decode($request->getContent(),true);
+				if(!isset($params)){
+					$params = $request->getContent();
+				}
 				
 			} else {
 				

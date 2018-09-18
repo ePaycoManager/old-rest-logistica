@@ -135,7 +135,7 @@
 			$dataCotizacion =array(
 					'ciudad_destino' => $data['ciudad_destinatario'],
 					'valor_mercancia' => $data['valor_mercancia'],
-					'fecha_despacho' => $data['fecha_despacho'],
+					'fecha_guia' => $data['fecha_guia'],
 					'tipo_envio'=>$data['tipo_envio'],
 					'unidad'=>array('peso_real'=>$data['kilos_reales'],
 						'cantidad_unidades'=>$data['cantidad_unidades'],
@@ -165,7 +165,7 @@
 				}else {
 					return 'El tipo envio no tiene un parametro valido';
 				}
-				$GrabarDespacho4->objDespacho->fechadespacho = $data['fecha_despacho'];
+				$GrabarDespacho4->objDespacho->fechadespacho = $data['fecha_guia'];
 				$GrabarDespacho4->objDespacho->cuentaremitente = '1114100';//Cuenta asignada al aliado de tcc -> ojo tab de conf cliente gateway o agregador para servicio logistico
 				$GrabarDespacho4->objDespacho->razonsocialremitente = $configUsuario->nombre;
 				$GrabarDespacho4->objDespacho->tipoidentificacionremitente = $configUsuario->tipo_documento;
@@ -245,6 +245,9 @@
 					
 					if($configUsuario->recogida_automatica){
 						$fechaRecogida = $date->modify('+1 day');
+						if($this->esFinDeSemana($fechaRecogida)){
+							$fechaRecogida = $date->modify('+2 day');
+						}
 						$ciudadRecogida = $this->ciudad_inteface->codigoTcc($configUsuario->ciudad);
 						if(!$ciudadRecogida){
 							return 'No se posee actualmente servicio de recogida en esa ciudad, por favor desactive el servicio de recogida automatica en la configuracion';
@@ -644,16 +647,96 @@
 		// Operaciones generales
 		
 		public function listaGuias($data, Request $request ) {
+			$user=$this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
+			$arrayResponse = array();
 			
-			$user = $this->user_interface->getIdUserRestPagos($request->get('api_token'));
+			$configNegocio = $this->config_negocio->getConfig($user);
+			
 			$remesas = DB::table('operaciones_epayco')
-				->select('operaciones_epayco.*','tcc_remesas.*')
-				->where('operaciones_epayco.operacion', '=','remesas')
-				->where('operaciones_epayco.id_cliente','=', "{$user}")
-				->join('tcc_remesas','operaciones_epayco.id_operacion_operador','=','tcc_remesas.id')
-				->get();
+			             ->select('*')
+			             ->where('operacion','=','remesas')
+						 ->where('id_cliente','=',$user)
+						 ->get();
 			
-			return $remesas;
+			foreach ($remesas as $remesa){
+				$itemToPush = array();
+				$itemTableGuia = DB::table('tcc_remesas')
+				               ->select('*')
+				               ->where('id','=',$remesa->id_operacion_operador)
+				               ->first();
+				
+				$cotizacionToSearch =  DB::table('operaciones_epayco')
+				                         ->select('*')
+				                         ->where('id_operacion_operador','=',$itemTableGuia->id_cotizacion)
+				                         ->first();
+				if(isset($cotizacionToSearch)){
+					$itemTableCotizacion = DB::table('tcc_cotizaciones')
+					                         ->select('*')
+					                         ->where('id','=',$cotizacionToSearch->id_operacion_operador)
+					                         ->first();
+				}
+				
+				
+				$itemTableRecogida = DB::table('tcc_recogidas')
+				                       ->select('*')
+				                       ->where('id','=',$remesa->id_recogida)
+				                       ->first();
+				
+				$itemToPush['cotizacion']['operador'] = isset($remesa->operador)?$remesa->operador:'';
+				$itemToPush['cotizacion']['valor'] = isset($itemTableCotizacion->total_despacho)?$itemTableCotizacion->total_despacho+(($itemTableCotizacion->total_despacho *  $configNegocio->porcentaje_cotizar)/100):'';
+				$itemToPush['cotizacion']['flete'] = isset($itemTableCotizacion->flete)?$itemTableCotizacion->flete +(($itemTableCotizacion->flete * $configNegocio->porcentaje_cotizar)/100):'';
+				$itemToPush['cotizacion']['manejo'] = isset($itemTableCotizacion->manejo)?$itemTableCotizacion->manejo+(($itemTableCotizacion->manejo * $configNegocio->porcentaje_cotizar)/100):'';
+//				$
+				$itemToPush['cotizacion']['peso'] = isset($itemTableCotizacion->peso_real)?$itemTableCotizacion->peso_real:'';
+				$itemToPush['cotizacion']['tipo_envio'] = isset($itemTableCotizacion->id_unidad_estrategica_negocio)?$itemTableCotizacion->id_unidad_estrategica_negocio:'';
+				$itemToPush['cotizacion']['numero_unidades'] = isset($itemTableCotizacion->numero_unidades)?$itemTableCotizacion->numero_unidades:'';
+				$itemToPush['cotizacion']['id_ciudad_origen'] = isset($itemTableCotizacion->id_ciudad_origen)?$itemTableCotizacion->id_ciudad_origen:'';
+				$itemToPush['cotizacion']['id_ciudad_destino'] = isset($itemTableCotizacion->id_ciudad_destino)?$itemTableCotizacion->id_ciudad_destino:'';
+				$itemToPush['cotizacion']['valor_mercancia'] = isset($itemTableCotizacion->valor_mercancia)?$itemTableCotizacion->valor_mercancia:'';
+				$itemToPush['guia']['numero_guia'] =isset($itemTableGuia->numero_remesa)?$itemTableGuia->numero_remesa:'';
+				$itemToPush['guia']['fecha_creacion'] = isset($itemTableGuia->created_at)?$itemTableGuia->created_at:'';
+				$itemToPush['guia']['razon_social_remitente'] = isset($itemTableGuia->razon_social_remitente)?$itemTableGuia->razon_social_remitente:'';
+				$itemToPush['guia']['naturaleza_remitente'] = isset($itemTableGuia->naturaleza_remitente)?$itemTableGuia->naturaleza_remitente:'';
+				$itemToPush['guia']['tipo_identificacion_remitente'] = isset($itemTableGuia->tipo_identificacion_remitente)?$itemTableGuia->tipo_identificacion_remitente:'';
+				$itemToPush['guia']['tipo_identificacion_destinatario'] = isset($itemTableGuia->tipo_identificacion_destinatario)?$itemTableGuia->tipo_identificacion_destinatario:'';
+				$itemToPush['guia']['tipo_destinatario'] = isset($itemTableGuia->tipo_destinatario)?$itemTableGuia->tipo_destinatario:'';
+				$itemToPush['guia']['primer_nombre_destinatario'] = isset($itemTableGuia->primer_nombre_destinatario)?$itemTableGuia->primer_nombre_destinatario:'';
+				$itemToPush['guia']['segundo_nombre_destinatario'] = isset($itemTableGuia->segundo_nombre_destinatario)?$itemTableGuia->segundo_nombre_destinatario:'';
+				$itemToPush['guia']['primer_apellido_destinatario'] = isset($itemTableGuia->primer_apellido_destinatario)?$itemTableGuia->primer_apellido_destinatario:'';
+				$itemToPush['guia']['segundo_apellido_destinatario'] = isset($itemTableGuia->segundo_apellido_destinatario)?$itemTableGuia->segundo_apellido_destinatario:'';
+				$itemToPush['guia']['direccion_destinatario'] = isset($itemTableGuia->direccion_destinatario)?$itemTableGuia->direccion_destinatario:'';
+				$itemToPush['guia']['observaciones'] = isset($remesa->observaciones)?$remesa->observaciones:'';
+				$itemToPush['guia']['url_rotulos'] = isset($remesa->url_rotulos)?$remesa->url_rotulos:'';
+				$itemToPush['guia']['url_envio'] = isset($remesa->url_relacion_envio)?$remesa->url_relacion_envio:'';
+				
+				$itemToPush['recogida']['nombre_solicitante'] = isset($itemTableRecogida->nombre_cliente)?$itemTableRecogida->nombre_cliente:'';
+				$itemToPush['recogida']['nombre_remitente'] = isset($itemTableRecogida->nombre_cliente_remitente)?$itemTableRecogida->nombre_cliente_remitente:'';
+				$itemToPush['recogida']['identificacion_remitente'] = isset($itemTableRecogida->identificacion_remitente)?$itemTableRecogida->identificacion_remitente:'';
+				$itemToPush['recogida']['tipo_documento_remitente'] = isset($itemTableRecogida->tipo_documento_remitente)?$itemTableRecogida->tipo_documento_remitente:'';
+				$itemToPush['recogida']['fecha_recogida'] = isset($itemTableRecogida->fecha_recogida)?$itemTableRecogida->fecha_recogida:'';
+				$itemToPush['recogida']['hora_inicial_recogia'] = isset($itemTableRecogida->hora_inicial_recogida)?$itemTableRecogida->hora_inicial_recogida:'';
+				$itemToPush['recogida']['hora_final_recogida'] = isset($itemTableRecogida->hora_final_recogida)?$itemTableRecogida->hora_final_recogida:'';
+				$itemToPush['recogida']['direccion_recogida'] = isset($itemTableRecogida->direccion_info_adicional_remitente)?$itemTableRecogida->direccion_info_adicional_remitente:'';
+				
+				array_push($arrayResponse,$itemToPush);
+				
+				
+				
+			}
+			
+//			$remesas = DB::table('operaciones_epayco')
+//				->select('operaciones_epayco.*','tcc_cotizaciones.flete','tcc_remesas.*','tcc_cotizaciones.*','tcc_recogidas.*', 'tcc_cotizaciones.manejo')
+//				->where('operaciones_epayco.operacion', '=','remesas')
+//				->where('operaciones_epayco.id_cliente','=', "{$user}")
+//				->join('tcc_remesas','operaciones_epayco.id_operacion_operador','=','tcc_remesas.id')
+//				->leftJoin('tcc_cotizaciones','tcc_remesas.id_cotizacion','=','tcc_cotizaciones.id')
+//				->leftJoin('tcc_recogidas','operaciones_epayco.id_recogida','=','tcc_recogidas.id')
+//
+//				->get();
+			
+			
+			
+			return $arrayResponse;
 			
 		}
 		
@@ -862,6 +945,19 @@
 		}
 		
 		//fin operaciones Configuracion
+		
+		//Utilidades
+		
+		function esFinDeSemana($date) {
+			
+			$timestamp = strtotime($date->format('Y-m-d'));
+			
+			$weekday= date("l", $timestamp );
+			
+			if ($weekday =="Saturday" OR $weekday =="Sunday") { return true; }
+			else {return false; }
+			
+		}
 	}
 	
 	

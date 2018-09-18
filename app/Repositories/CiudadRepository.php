@@ -42,7 +42,7 @@
 		
 		public function codigoTcc($codigo) {
 			
-			$ciudad = DB::table('ciudades')->where('codigo_dane',$codigo)->get()->first();
+			$ciudad = DB::table('ciudades')->where('codigo_dane','=',$codigo)->where('codigo_tcc','<>',null)->first();
 			
 			if($ciudad){
 				return $ciudad->codigo_tcc;

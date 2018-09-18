@@ -33,8 +33,8 @@ class CreateTableTccRecogidas extends Migration
 	        $table->string('tipo_documento_remitente')->nullable();
 	        $table->string('identificacion_remitente')->nullable();
 	        $table->dateTime('fecha_recogida')->nullable();
-	        $table->dateTime('hora_inicial_recogida')->nullable();
-	        $table->dateTime('hora_final_recogida')->nullable();
+	        $table->string('hora_inicial_recogida')->nullable();
+	        $table->string('hora_final_recogida')->nullable();
 	        $table->string('unidades')->nullable();
 	        $table->string('peso')->nullable();
 	        $table->string('volumen')->nullable();
