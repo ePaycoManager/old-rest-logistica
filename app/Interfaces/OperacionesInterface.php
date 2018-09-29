@@ -6,6 +6,7 @@
 	
 	interface OperacionesInterface{
 		public function tccCotizacion($data, Request $request);
+		public function generalCotizacion($data, Request $request);
 		public function tccGuia($data, Request $request);
 		public function tccRecogida($data, Request $request);
 		public function tccRecogidaCron($data, Request $request);

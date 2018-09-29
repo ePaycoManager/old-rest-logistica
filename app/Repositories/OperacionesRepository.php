@@ -740,9 +740,38 @@
 			
 		}
 		
+		
+		public function generalCotizacion( $data, Request $request ) {
+			// TODO: Implement generalCotizacion() method.
+			try{
+				$dataCotizacion =array(
+					'ciudad_destino' => $data['ciudad_destino'],
+					'valor_mercancia' => $data['valor_mercancia'],
+					'fecha_guia' => $data['fecha_guia'],
+					'tipo_envio'=>$data['tipo_envio'],
+					'unidad'=>array('peso_real'=>$data['unidad']['peso_real'],
+					                'cantidad_unidades'=>$data['unidad']['cantidad_unidades'],
+					                'alto'=>0,
+					                'largo'=>0,
+					                'ancho'=>0
+					),
+					'id_configuracion'=>$data['id_configuracion']
+				
+				);
+				$cotizacionTcc =  $this->tccCotizacion($dataCotizacion, $request);
+				
+				$response = array('tcc'=>$cotizacionTcc);
+				return $response;
+				
+			} catch(\Exception $e){
+				return $e;
+			}
+			
+		}
+		
 		//fin operaciones generales
 		
-		//orperaciones Configuracion
+		//operaciones Configuracion
 		
 		public function configuracionUsuario($data, Request $request){
 			$idUsuarioRest = $this->user_interface->getIdUserRestPagos($request->header( 'php-auth-user' ));
@@ -958,6 +987,8 @@
 			else {return false; }
 			
 		}
+
+		//fin Utilidades
 	}
 	
 	

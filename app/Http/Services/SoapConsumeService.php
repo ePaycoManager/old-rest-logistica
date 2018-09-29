@@ -44,7 +44,7 @@
 		}
 		
 		public function consumeSoap($headers = null, $data = null, $wsdl = null, $function = null){
-			$this->client = $this->_client($wsdl,array('cache_wsdl' => WSDL_CACHE_NONE));
+			$this->client = $this->_client($wsdl);
 			
 			
 			if($headers != null){
@@ -53,7 +53,7 @@
 			try {
 				
 				$result = $this->client->$function($data);
-				$last_request = $this->client->__getLastRequest();
+
 				
 				return $result;
 			}
