@@ -303,6 +303,7 @@
 					'guia'=>$soapResponse->remesa,
 					'url_relacion_envio'=>$soapResponse->URLRelacionEnvio,
 					'url_rotulos'=>$soapResponse->URLRotulos,
+					'url_traking'=>'https://www.tcc.com.co/rastreo?tipo=RE&documento='.$soapResponse->remesa,
 					'respuesta'=>$soapResponse->respuesta,
 					'mensaje'=>$soapResponse->mensaje,
 					'id_guia' => $operacionEpayco->id,
