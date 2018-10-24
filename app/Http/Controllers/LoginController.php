@@ -70,7 +70,7 @@
 			$curl = curl_init();
 			
 			curl_setopt_array($curl, array(
-				CURLOPT_URL => "http://localhost/restpagos/index.php/api/login/check",
+				CURLOPT_URL => "http://secure2.epayco.io/restpagos/index.php/api/login/check",
 				CURLOPT_RETURNTRANSFER => true,
 				CURLOPT_ENCODING => "",
 				CURLOPT_MAXREDIRS => 10,
