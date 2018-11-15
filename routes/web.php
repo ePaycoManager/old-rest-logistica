@@ -16,10 +16,12 @@ $router->get('/', function () use ($router) {
 });
 //login
 $router->post('/login',  ['uses' => 'LoginController@login']);
+$router->get('/api/ciudades/agrupado','CiudadController@ciudadesAgrupado');
 //resto de rutas
 $router->group(['prefix' => 'api','middleware' => 'auth'], function () use ($router) {
     $router->post('/{operador}/{operacion}',  ['uses' => 'IndexController@index']);
 	$router->get('/ciudades','CiudadController@index');
 	$router->get('/departamentos','CiudadController@departamentos');
-	$router->get('/ciudades/agrupado','CiudadController@ciudadesAgrupado');
+
+
 });
